@@ -11,7 +11,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-from app.models import OperationTypeEnum
+from app.store.models import OperationTypeEnum
 
 
 # revision identifiers, used by Alembic.
