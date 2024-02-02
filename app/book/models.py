@@ -4,6 +4,7 @@ from sqlalchemy import (
     Integer,
     String,
     ForeignKey,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -13,6 +14,7 @@ from app.database.db import Base
 class Book(Base):
     __tablename__ = "books"
 
+    __table_args__ = (UniqueConstraint("title", "publish_year"),)
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     barcode = Column(String, nullable=False)

@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-from app.author.models import Author
 from app.database.test_db import override_get_db
 from app.main import app
 from app.database.db import get_db

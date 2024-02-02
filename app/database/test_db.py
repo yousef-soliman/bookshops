@@ -1,6 +1,10 @@
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.author.models import Author
+from app.book.models import Book
+from app.store.models import Storing
+
 from app.database.db import Base
 
 
@@ -12,7 +16,6 @@ engine = create_engine(
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 Base.metadata.create_all(bind=engine)
 
