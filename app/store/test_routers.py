@@ -28,7 +28,6 @@ def test_update_store_add():
     response = client.post("/store/leftover/add", json=store_payload)
 
     assert response.status_code == 200
-
     data = response.json()
     assert data["quantity"] == 10
 

@@ -20,8 +20,8 @@ def get_all_books_by_barcode(db: Session, barcode: str) -> list[Book]:
 
 
 def get_book_by_id(db: Session, book_id: int) -> Book:
-    books = db.query(Book).filter(Book.id == book_id).first()
-    return books
+    book = db.query(Book).filter(Book.id == book_id).first()
+    return book
 
 
 def create_book(db: Session, book: schemas.BookCreate) -> Book:

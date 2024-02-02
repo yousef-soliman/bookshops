@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from app.book.schemas import Book
+from app.book.schemas import Book, BookBase
 
 from app.store.enum import OperationType
 
@@ -18,3 +18,16 @@ class Store(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class History(BaseModel):
+    quantity: int
+    date: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class StoreHistory(BaseModel):
+    book: BookBase
+    history: list[History]
