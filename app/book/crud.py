@@ -9,6 +9,11 @@ def get_all_books(db: Session) -> list[Book]:
     return books
 
 
+def get_one_books_by_barcode(db: Session, barcode: str) -> Book:
+    book = db.query(Book).filter(Book.barcode == barcode).first()
+    return book
+
+
 def get_all_books_by_barcode(db: Session, barcode: str) -> list[Book]:
     books = db.query(Book).filter(Book.barcode == barcode).all()
     return books

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.db import get_db
+from app.store.crud import create_store
 from . import models, schemas
 from app.store.enum import OperationType
 from app.book.models import Book
@@ -12,17 +13,11 @@ router = APIRouter(
 )
 
 
-@router.get("/leftover/{operation_type}", response_model=schemas.Store)
+@router.post("/leftover/{operation_type}", response_model=schemas.Store)
 async def update_store(
     operation_type: OperationType,
     store: schemas.StoreCreation,
     db: Session = Depends(get_db),
 ):
-    book = db.query(Book).filter(Book.barcode == store.barcode).first()
-    store = models.Storing(
-        book=book, quantity=store.quantity, operation_type=operation_type
-    )
-    db.add(store)
-    db.commit()
-    db.refresh(store)
+    store = create_store(db, store, operation_type)
     return store
