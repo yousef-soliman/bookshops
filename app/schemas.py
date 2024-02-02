@@ -1,5 +1,7 @@
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime
+
+from app.enum import OperationType
 
 
 class AuthorBase(BaseModel):
@@ -32,6 +34,21 @@ class BookCreate(BookBase):
 class Book(BookBase):
     id: int
     author: Author
+
+    class Config:
+        orm_mode = True
+
+
+class StoreCreation(BaseModel):
+    barcode: str
+    quantity: int
+
+
+class Store(BaseModel):
+    book: Book
+    quantity: int
+    date: datetime
+    operation_type: OperationType
 
     class Config:
         orm_mode = True

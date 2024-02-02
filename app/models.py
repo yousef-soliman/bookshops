@@ -2,11 +2,15 @@ from sqlalchemy import (
     Column,
     Date,
     DateTime,
+    Enum,
     ForeignKey,
     Integer,
     String,
 )
 from sqlalchemy.orm import relationship
+from datetime import datetime
+
+from app.enum import OperationType
 from .db import Base
 
 
@@ -34,11 +38,20 @@ class Book(Base):
     stroning_infos = relationship("Storing", back_populates="book")
 
 
+OperationTypeEnum = Enum(OperationType)
+
+
 class Storing(Base):
     __tablename__ = "storing"
 
     id = Column(Integer, primary_key=True)
+    operation_type = Column(
+        OperationTypeEnum,
+        default=OperationType.add,
+        nullable=False,
+    )
     quantity = Column(Integer, nullable=False)
-    date = Column(DateTime, nullable=False)
+    date = Column(DateTime, nullable=False, default=datetime.now())
+
     book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
     book = relationship("Book", back_populates="stroning_infos")

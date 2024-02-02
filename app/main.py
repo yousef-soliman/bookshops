@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from starlette.routing import request_response
 
 from app.db import get_db, init_db
+from app.enum import OperationType
 from . import models, schemas
 
 # init_db()
@@ -48,13 +49,33 @@ async def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
     return book
 
 
-@app.get("/books", response_model=list[schemas.Book])
-async def get_all_books(db: Session = Depends(get_db)):
-    books = db.query(models.Book).all()
-    return books
-
-
 @app.get("/books/{book_id}", response_model=schemas.Book)
 async def get_book(book_id: int, db: Session = Depends(get_db)):
     book = db.query(models.Book).filter(models.Book.id == book_id).first()
     return book
+
+
+@app.get("/books", response_model=list[schemas.Book])
+async def get_all_books(barcode: str | None = None, db: Session = Depends(get_db)):
+    book_model = db.query(models.Book)
+    book_qury = book_model
+    if barcode:
+        book_qury = book_qury.filter(models.Book.barcode == barcode)
+    books = book_qury.all()
+    return books
+
+
+@app.get("/leftover/{operation_type}", response_model=schemas.Store)
+async def update_store(
+    operation_type: OperationType,
+    store: schemas.StoreCreation,
+    db: Session = Depends(get_db),
+):
+    book = db.query(models.Book).filter(models.Book.barcode == store.barcode).first()
+    store = models.Storing(
+        book=book, quantity=store.quantity, operation_type=operation_type
+    )
+    db.add(store)
+    db.commit()
+    db.refresh(store)
+    return store
