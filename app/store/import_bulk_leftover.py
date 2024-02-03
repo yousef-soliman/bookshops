@@ -68,7 +68,7 @@ class ImportBulkLeftOver:
         return res
 
     def import_row(self, db: Session, store: schemas.StoreCreation):
-        if not store.barcode:
+        if store.barcode:
             operation_type = (
                 OperationType.add if store.quantity > 0 else OperationType.remove
             )
