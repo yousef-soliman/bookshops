@@ -1,5 +1,6 @@
 from datetime import date
 from sqlalchemy.orm import Session
+from sqlalchemy import Date, cast, func
 
 from app.book.crud import get_book_by_id, get_one_books_by_barcode
 from app.book.models import Book
@@ -34,10 +35,31 @@ def get_history_for_book(
     db: Session, book_id: int, start: date, end: date
 ) -> schemas.StoreHistory:
     book = get_book_by_id(db, book_id)
+    cast_date = cast(Storing.date, Date)
     storings = (
         db.query(Storing)
-        .filter(Storing.book_id == book_id, Storing.date >= start, Storing.date <= end)
+        .filter(Storing.book_id == book_id, cast_date >= start, cast_date <= end)
         .all()
     )
+    start_balance = (
+        db.query(func.sum(Storing.quantity))
+        .filter(Storing.book_id == book_id, cast_date <= start)
+        .scalar()
+    )
+    start_balance = start_balance or 0
+    # import pdb
+
+    # pdb.set_trace()
+    end_balance = (
+        db.query(func.sum(Storing.quantity))
+        .filter(Storing.book_id == book_id, cast_date <= end)
+        .scalar()
+    )
+    end_balance = end_balance or 0
     history = [storing.__dict__ for storing in storings]
-    return schemas.StoreHistory(book=book.__dict__, history=history)
+    return schemas.StoreHistory(
+        book=book.__dict__,
+        history=history,
+        start_balance=start_balance,
+        end_balance=end_balance,
+    )

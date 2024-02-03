@@ -31,3 +31,5 @@ class History(BaseModel):
 class StoreHistory(BaseModel):
     book: BookBase
     history: list[History]
+    start_balance: int
+    end_balance: int
