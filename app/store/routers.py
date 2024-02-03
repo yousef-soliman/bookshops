@@ -1,9 +1,9 @@
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
-import pandas as pd
 
 from app.database.db import get_db
+from app.store.import_bulk_leftover import ImportBulkLeftOver
 from . import models, schemas, crud
 from app.store.enum import OperationType
 from app.book.models import Book
@@ -19,25 +19,7 @@ async def bulk_leftover(
     file: UploadFile,
     db: Session = Depends(get_db),
 ):
-    df = pd.read_excel(file.file, sheet_name=None, header=None)
-    sheet1 = list(df.keys())[0]
-    for index, record in df[sheet1].iterrows():
-        import pdb
-
-        pdb.set_trace()
-        try:
-            if str(record[0]):
-                store = schemas.StoreCreation(
-                    barcode=str(record[0]), quantity=abs(int(record[1]))
-                )
-                operation_type = (
-                    OperationType.add if record[1] > 0 else OperationType.remove
-                )
-                store = crud.create_store(db, store, operation_type)
-        except:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"error in row {index}"
-            )
+    ImportBulkLeftOver(file=file).import_data(db)
     return {"filename": file.filename}
 
 
