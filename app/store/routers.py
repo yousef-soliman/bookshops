@@ -19,7 +19,7 @@ async def bulk_leftover(
     file: UploadFile,
     db: Session = Depends(get_db),
 ):
-    ImportBulkLeftOver(file=file).import_data(db)
+    await ImportBulkLeftOver(file=file).import_data(db)
     return {"filename": file.filename}
 
 
@@ -33,7 +33,7 @@ async def update_store(
     store: schemas.StoreCreation,
     db: Session = Depends(get_db),
 ):
-    store = crud.create_store(db, store, operation_type)
+    store = await crud.create_store(db, store, operation_type)
     return store
 
 
@@ -44,5 +44,5 @@ async def get_history_for_book(
     end: date,
     db: Session = Depends(get_db),
 ):
-    store = crud.get_history_for_book(db, book_id, start, end)
+    store = await crud.get_history_for_book(db, book_id, start, end)
     return store

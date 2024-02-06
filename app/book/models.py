@@ -21,6 +21,6 @@ class Book(Base):
     publish_year = Column(Integer, nullable=False)
 
     author_id = Column(Integer, ForeignKey("authors.id"), nullable=False)
-    author = relationship("Author", back_populates="books")
+    author = relationship("Author", back_populates="books", lazy="joined")
 
     stroning_infos = relationship("Storing", back_populates="book")

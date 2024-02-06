@@ -27,7 +27,7 @@ def test_update_store_add():
 
     response = client.post("/store/leftover/add", json=store_payload)
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["quantity"] == 10
 
@@ -37,7 +37,7 @@ def test_update_store_remove():
 
     response = client.post("/store/leftover/remove", json=store_payload)
 
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     data = response.json()
-    assert data["quantity"] == 10
+    assert data["quantity"] == -10

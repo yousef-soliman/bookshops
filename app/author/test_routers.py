@@ -11,7 +11,7 @@ def test_create_author():
     response = client.post(
         "/authors", json={"name": "Test Author", "birth_date": "2000-01-01"}
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert "id" in data
     assert data["name"] == "Test Author"
@@ -22,7 +22,7 @@ def test_create_author_same_name_same_birth_date():
     response = client.post(
         "/authors", json={"name": "Test Author", "birth_date": "2005-01-01"}
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     response = client.post(
         "/authors", json={"name": "Test Author", "birth_date": "2005-01-01"}
     )
@@ -33,11 +33,11 @@ def test_create_author_same_name_different_birth_date():
     response = client.post(
         "/authors", json={"name": "Test Author", "birth_date": "2004-01-01"}
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     response = client.post(
         "/authors", json={"name": "Test Author", "birth_date": "2001-01-01"}
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
 def test_get_all_authors():

@@ -1,6 +1,6 @@
 import re
+from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi import HTTPException, UploadFile, status
-from sqlalchemy.orm import Session
 from app.store import crud, schemas
 import pandas as pd
 
@@ -67,18 +67,18 @@ class ImportBulkLeftOver:
             res.append(schemas.StoreCreation(barcode=row[0], quantity=int(row[1])))
         return res
 
-    def import_row(self, db: Session, store: schemas.StoreCreation):
+    async def import_row(self, db: AsyncSession, store: schemas.StoreCreation):
         if store.barcode:
             operation_type = (
                 OperationType.add if store.quantity > 0 else OperationType.remove
             )
-            store = crud.create_store(db, store, operation_type)
+            store = await crud.create_store(db, store, operation_type)
 
-    def import_data(self, db: Session):
+    async def import_data(self, db: AsyncSession):
         store_info = self.get_store_infos()
         for index, store in enumerate(store_info):
             try:
-                self.import_row(db, store)
+                await self.import_row(db, store)
             except:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,

@@ -1,6 +1,6 @@
 from datetime import date
-from sqlalchemy.orm import Session
-from sqlalchemy import Date, cast, func
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import Date, cast, func, select
 
 from app.book.crud import get_book_by_id, get_one_books_by_barcode
 from app.book.models import Book
@@ -10,52 +10,55 @@ from app.store.enum import OperationType
 from app.store.models import Storing
 
 
-def create_store_record(
-    db: Session, book: Book, store: schemas.StoreCreation, operation_type: OperationType
+async def create_store_record(
+    db: AsyncSession,
+    book: Book,
+    store: schemas.StoreCreation,
+    operation_type: OperationType,
 ) -> Storing:
     quantity = (
         store.quantity if operation_type == OperationType.add else -store.quantity
     )
     store = Storing(book=book, quantity=quantity, operation_type=operation_type)
     db.add(store)
-    db.commit()
-    db.refresh(store)
+    await db.commit()
+    await db.refresh(store)
     return store
 
 
-def create_store(
-    db: Session, store: schemas.StoreCreation, operation_type: OperationType
+async def create_store(
+    db: AsyncSession, store: schemas.StoreCreation, operation_type: OperationType
 ) -> Storing:
-    book = get_one_books_by_barcode(db, store.barcode)
-    store = create_store_record(db, book, store, operation_type)
+    book = await get_one_books_by_barcode(db, store.barcode)
+    store = await create_store_record(db, book, store, operation_type)
     return store
 
 
-def get_history_for_book(
-    db: Session, book_id: int, start: date, end: date
+async def get_history_for_book(
+    db: AsyncSession, book_id: int, start: date, end: date
 ) -> schemas.StoreHistory:
-    book = get_book_by_id(db, book_id)
+    book = await get_book_by_id(db, book_id)
     cast_date = cast(Storing.date, Date)
-    storings = (
-        db.query(Storing)
-        .filter(Storing.book_id == book_id, cast_date >= start, cast_date <= end)
-        .all()
+    statement = select(Storing).where(
+        Storing.book_id == book_id, cast_date >= start, cast_date <= end
     )
-    start_balance = (
-        db.query(func.sum(Storing.quantity))
-        .filter(Storing.book_id == book_id, cast_date <= start)
-        .scalar()
-    )
-    start_balance = start_balance or 0
-    # import pdb
+    storings = await db.execute(statement)
+    storings = storings.scalars()
 
-    # pdb.set_trace()
-    end_balance = (
-        db.query(func.sum(Storing.quantity))
-        .filter(Storing.book_id == book_id, cast_date <= end)
-        .scalar()
+    statement = select(func.sum(Storing.quantity)).where(
+        Storing.book_id == book_id, cast_date <= start
     )
+    start_balance = await db.execute(statement)
+    start_balance = start_balance.scalar()
+    start_balance = start_balance or 0
+
+    statement = select(func.sum(Storing.quantity)).where(
+        Storing.book_id == book_id, cast_date <= end
+    )
+    end_balance = await db.execute(statement)
+    end_balance = end_balance.scalar()
     end_balance = end_balance or 0
+
     history = [storing.__dict__ for storing in storings]
     return schemas.StoreHistory(
         book=book.__dict__,

@@ -1,31 +1,37 @@
-from sqlalchemy.orm import Session
+from app.author.crud import get_author_by_id
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import select
 from app.author.models import Author
 from app.book import schemas
 from app.book.models import Book
 
 
-def get_all_books(db: Session) -> list[Book]:
-    books = db.query(Book).all()
-    return books
+async def get_all_books(db: AsyncSession) -> list[Book]:
+    statement = select(Book)
+    books = await db.execute(statement)
+    return books.scalars()
 
 
-def get_one_books_by_barcode(db: Session, barcode: str) -> Book:
-    book = db.query(Book).filter(Book.barcode == barcode).first()
-    return book
+async def get_one_books_by_barcode(db: AsyncSession, barcode: str) -> Book:
+    statement = select(Book).where(Book.barcode == barcode)
+    book = await db.execute(statement)
+    return book.scalars().first()
 
 
-def get_all_books_by_barcode(db: Session, barcode: str) -> list[Book]:
-    books = db.query(Book).filter(Book.barcode == barcode).all()
-    return books
+async def get_all_books_by_barcode(db: AsyncSession, barcode: str) -> list[Book]:
+    statement = select(Book).where(Book.barcode == barcode)
+    books = await db.execute(statement)
+    return books.scalars()
 
 
-def get_book_by_id(db: Session, book_id: int) -> Book:
-    book = db.query(Book).filter(Book.id == book_id).first()
-    return book
+async def get_book_by_id(db: AsyncSession, book_id: int) -> Book:
+    statement = select(Book).where(Book.id == book_id)
+    book = await db.execute(statement)
+    return book.scalars().first()
 
 
-def create_book(db: Session, book: schemas.BookCreate) -> Book:
-    author = db.query(Author).filter_by(id=book.author).first()
+async def create_book(db: AsyncSession, book: schemas.BookCreate) -> Book:
+    author = await get_author_by_id(db, book.author)
     book = Book(
         title=book.title,
         publish_year=book.publish_year,
@@ -33,6 +39,6 @@ def create_book(db: Session, book: schemas.BookCreate) -> Book:
         author=author,
     )
     db.add(book)
-    db.commit()
-    db.refresh(book)
+    await db.commit()
+    await db.refresh(book)
     return book

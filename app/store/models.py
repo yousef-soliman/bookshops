@@ -22,4 +22,4 @@ class Storing(Base):
     date = Column(DateTime, nullable=False, default=datetime.now())
 
     book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
-    book = relationship("Book", back_populates="stroning_infos")
+    book = relationship("Book", back_populates="stroning_infos", lazy="joined")

@@ -1,21 +1,24 @@
-from sqlalchemy.orm import Session
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy import select
 from app.author import schemas
 from app.author.models import Author
 
 
-def get_all_authors(db: Session) -> list[Author]:
-    authors = db.query(Author).all()
-    return authors
+async def get_all_authors(db: AsyncSession) -> list[Author]:
+    statement = select(Author)
+    authors = await db.execute(statement)
+    return authors.scalars()
 
 
-def get_author_by_id(db: Session, author_id: int) -> Author:
-    author = db.query(Author).filter(Author.id == author_id).first()
-    return author
+async def get_author_by_id(db: AsyncSession, author_id: int) -> Author:
+    statement = select(Author).where(Author.id == author_id)
+    author = await db.execute(statement)
+    return author.scalars().first()
 
 
-def create_author(db: Session, author: schemas.AuthorCreate) -> Author:
+async def create_author(db: AsyncSession, author: schemas.AuthorCreate) -> Author:
     author = Author(name=author.name, birth_date=author.birth_date)
     db.add(author)
-    db.commit()
-    db.refresh(author)
+    await db.commit()
+    await db.refresh(author)
     return author
