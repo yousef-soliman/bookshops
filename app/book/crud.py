@@ -24,6 +24,14 @@ async def get_all_books_by_barcode(db: AsyncSession, barcode: str) -> list[Book]
     return books.scalars()
 
 
+async def get_all_books_in_barcode_list(
+    db: AsyncSession, barcodes: list[str]
+) -> list[Book]:
+    statement = select(Book).where(Book.barcode.in_(barcodes))
+    books = await db.execute(statement)
+    return books.scalars()
+
+
 async def get_book_by_id(db: AsyncSession, book_id: int) -> Book:
     statement = select(Book).where(Book.id == book_id)
     book = await db.execute(statement)

@@ -33,3 +33,9 @@ class StoreHistory(BaseModel):
     history: list[History]
     start_balance: int
     end_balance: int
+
+
+class StoreCreationNative(BaseModel):
+    book_id: int
+    quantity: int
+    operation_type: OperationType

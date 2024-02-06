@@ -34,6 +34,21 @@ async def create_store(
     return store
 
 
+async def create_store_native(
+    db: AsyncSession, store: schemas.StoreCreationNative
+) -> Storing:
+    store = Storing(
+        book_id=store.book_id,
+        quantity=store.quantity,
+        operation_type=store.operation_type,
+    )
+    db.add(store)
+    await db.commit()
+    await db.refresh(store)
+
+    return store
+
+
 async def get_history_for_book(
     db: AsyncSession, book_id: int, start: date, end: date
 ) -> schemas.StoreHistory:
