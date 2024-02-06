@@ -23,7 +23,11 @@ async def bulk_leftover(
     return {"filename": file.filename}
 
 
-@router.post("/leftover/{operation_type}", response_model=schemas.Store)
+@router.post(
+    "/leftover/{operation_type}",
+    response_model=schemas.Store,
+    status_code=status.HTTP_201_CREATED,
+)
 async def update_store(
     operation_type: OperationType,
     store: schemas.StoreCreation,

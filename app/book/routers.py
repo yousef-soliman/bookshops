@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=schemas.Book)
+@router.post("/", response_model=schemas.Book, status_code=status.HTTP_201_CREATED)
 async def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
     try:
         book = crud.create_book(db, book)

@@ -10,7 +10,7 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=schemas.Author)
+@router.post("", response_model=schemas.Author, status_code=status.HTTP_201_CREATED)
 async def create_author(author: schemas.AuthorCreate, db: Session = Depends(get_db)):
     try:
         author = crud.create_author(db, author)
